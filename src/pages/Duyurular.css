@@ -1,0 +1,89 @@
+.duyurular-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9f9f9;
+  }
+  
+  .duyurular-baslik {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    color: #222;
+    text-align: center;
+  }
+  
+  .tum-duyurular-aciklama {
+    font-size: 16px;
+    color: #f8f9fa;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .duyurular-listesi {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .duyuru-karti {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    padding: 24px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  
+  .duyuru-karti:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+  }
+  
+  .duyuru-tarih {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 10px;
+  }
+  
+  .duyuru-baslik {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 12px;
+  }
+  
+  .duyuru-ozet {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.5;
+  }
+  
+  .devamini-oku {
+    display: inline-block;
+    margin-top: 16px;
+    font-weight: bold;
+    color: #000;
+    transition: color 0.2s ease;
+  }
+  
+  .devamini-oku:hover {
+    color: #000;
+  }
+  
+  .tum-duyurular-link {
+    display: block;
+    text-align: center;
+    margin-top: 40px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #007BFF;
+    transition: color 0.2s ease;
+  }
+  
+  .tum-duyurular-link:hover {
+    color: #0056b3;
+  }
+  

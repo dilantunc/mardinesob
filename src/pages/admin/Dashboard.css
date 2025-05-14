@@ -1,0 +1,62 @@
+/* Dashboard.css */
+.dashboard-bg {
+    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%);
+    min-height: 100vh;
+    margin: 100px;
+}
+
+.dashboard-nav {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+
+.dashboard-nav .nav-link.active {
+    background: linear-gradient(90deg, #4f8cff 0%, #38c6d9 100%);
+    color: #fff !important;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.dashboard-nav .nav-link {
+    transition: background 0.2s, color 0.2s;
+}
+
+.dashboard-nav .nav-link:hover {
+    background: #e6f0fa;
+    color: #4f8cff !important;
+}
+
+.table thead {
+    background: #f0f4fa;
+}
+
+.table tbody tr:hover {
+    background: #f7fbff;
+}
+
+.btn-success {
+    background: linear-gradient(90deg, #38c6d9 0%, #4f8cff 100%);
+    border: none;
+}
+
+.btn-warning {
+    background: #ffe082;
+    color: #6d4c00;
+    border: none;
+}
+
+.btn-danger {
+    background: #ff6b6b;
+    border: none;
+}
+
+.modal-content {
+    border-radius: 16px;
+}
+
+@media (max-width: 768px) {
+    .dashboard-nav {
+        margin-bottom: 1rem;
+    }
+}
