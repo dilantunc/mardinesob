@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { S3Client, PutObjectCommand, DeleteObjectCommand, ListBucketsCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import admin from 'firebase-admin';
 import fs from 'fs';
 
@@ -40,7 +40,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   const { name, subject, type } = req.body;
 
   if (!file || !name || !subject || !type) {
-    fs.unlinkSync(file?.path ?? '');
+    if (file?.path) fs.unlinkSync(file.path);
     return res.status(400).json({ error: 'Zorunlu alanlar eksik' });
   }
 
@@ -107,4 +107,9 @@ app.delete('/delete', async (req, res) => {
   }
 });
 
-app.listen(5000, () => console.log('Sunucu http://localhost:5000 üzerinde çalışıyor'));
+// PORT'u env'den al, yoksa 5000 default
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Sunucu http://0.0.0.0:${PORT} üzerinde çalışıyor`);
+});
