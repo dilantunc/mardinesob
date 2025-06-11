@@ -5,17 +5,20 @@ import dotenv from 'dotenv';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import admin from 'firebase-admin';
 import fs from 'fs';
+import path from 'path';
 
 dotenv.config();
 const app = express();
-const upload = multer({ 
+
+const upload = multer({
   dest: 'uploads/',
-  limits: { fileSize: 10 * 1024 * 1024 }
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
+// Firebase admin initialization
 admin.initializeApp({
   credential: admin.credential.cert({
     projectId: process.env.FIREBASE_PROJECT_ID,
@@ -23,11 +26,11 @@ admin.initializeApp({
     privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
   }),
 });
-
 const db = admin.firestore();
 
+// S3 Client setup for Cloudflare R2 or similar S3-compatible service
 const s3 = new S3Client({
-  region: 'auto',
+  region: 'auto', // R2 için auto region
   endpoint: process.env.R2_ENDPOINT,
   credentials: {
     accessKeyId: process.env.R2_ACCESS_KEY_ID,
@@ -35,6 +38,7 @@ const s3 = new S3Client({
   },
 });
 
+// Upload endpoint
 app.post('/upload', upload.single('file'), async (req, res) => {
   const file = req.file;
   const { name, subject, type } = req.body;
@@ -44,21 +48,23 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     return res.status(400).json({ error: 'Zorunlu alanlar eksik' });
   }
 
-  const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+  const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/gif'];
   if (!allowedTypes.includes(file.mimetype)) {
     fs.unlinkSync(file.path);
     return res.status(400).json({ error: 'Geçersiz dosya türü' });
   }
 
   const fileContent = fs.readFileSync(file.path);
-  const fileName = Date.now() + '-' + file.originalname;
+  const fileName = `${Date.now()}-${path.basename(file.originalname)}`;
 
   try {
+    // S3 upload
     const command = new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME,
       Key: fileName,
       Body: fileContent,
       ContentType: file.mimetype,
+      ACL: 'public-read', // Eğer erişim için gerekli ise
     });
 
     await s3.send(command);
@@ -66,6 +72,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     const fileUrl = `${process.env.R2_PUBLIC_URL}/${fileName}`;
     const collectionName = type === 'haber' ? 'Haberler' : 'Genelgeler';
 
+    // Firestore'a kaydet
     await db.collection(collectionName).add({
       url: fileUrl,
       name,
@@ -79,14 +86,18 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     console.error('Yükleme hatası:', err);
     res.status(500).json({ error: 'Yükleme başarısız' });
   } finally {
+    // Temp dosyayı sil
     fs.unlinkSync(file.path);
   }
 });
 
+// Delete endpoint
 app.delete('/delete', async (req, res) => {
   const { fileUrl, type } = req.body;
 
-  if (!fileUrl || !type) return res.status(400).json({ error: 'Veri eksik' });
+  if (!fileUrl || !type) {
+    return res.status(400).json({ error: 'Veri eksik' });
+  }
 
   try {
     const fileName = fileUrl.split('/').pop();
@@ -97,8 +108,13 @@ app.delete('/delete', async (req, res) => {
     }));
 
     const collectionName = type === 'haber' ? 'Haberler' : 'Genelgeler';
+
     const docs = await db.collection(collectionName).where('url', '==', fileUrl).get();
-    docs.forEach(async (doc) => await doc.ref.delete());
+    const deletePromises = [];
+    docs.forEach(doc => {
+      deletePromises.push(doc.ref.delete());
+    });
+    await Promise.all(deletePromises);
 
     res.json({ success: true, message: 'Silindi' });
   } catch (err) {
@@ -107,7 +123,6 @@ app.delete('/delete', async (req, res) => {
   }
 });
 
-// PORT'u env'den al, yoksa 5000 default
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, '0.0.0.0', () => {

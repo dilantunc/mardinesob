@@ -21,7 +21,7 @@ const Genelgeler = () => {
             name: genelgeData.name || "İsimsiz Genelge",
             subject: genelgeData.subject || "Konu belirtilmemiş",
             url: genelgeData.url,
-            createdAt: genelgeData.createdAt?.toDate
+            createdAt: genelgeData.createdAt?.toDate()
               ? format(genelgeData.createdAt.toDate(), 'dd MMMM yyyy HH:mm', { locale: tr })
               : "Tarih bilgisi yok"
           };

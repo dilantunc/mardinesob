@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Button, Table, Modal, ModalHeader, ModalBody, ModalFooter,
-  Input, Form, FormGroup, Label, FormFeedback, Alert, Spinner,
+  Input, Form, FormGroup, Label, FormFeedback, Alert,Fade, Spinner,
 } from "reactstrap";
 import axios from "axios";
 import { db } from "../../../firebase-config";
@@ -139,9 +139,12 @@ const HaberlerPage = () => {
       <h2>Haberler</h2>
 
       {alertMessage.visible && (
-        <Alert color={alertMessage.type}>{alertMessage.text}</Alert>
+        <Fade in={alertMessage.visible} timeout={300}>
+          <Alert color={alertMessage.type} fade={false}>
+            {alertMessage.text}
+          </Alert>
+        </Fade>
       )}
-
       <Button color="success" onClick={() => setIsModalOpen(true)}>
         Yeni Haber Ekle
       </Button>

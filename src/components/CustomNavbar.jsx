@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Navbar as ReactstrapNavbar,
@@ -14,20 +14,9 @@ import Logo from "../../src/assets/logo1.png";
 
 const CustomNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const location = useLocation();
-  const isHomePage = location.pathname === "/"; // <<--- EKLEDİK
-
   const toggle = () => setIsOpen(!isOpen);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const location = useLocation();
 
   const menuItems = [
     {
@@ -42,7 +31,7 @@ const CustomNavbar = () => {
       label: "Bilgi Bankası",
       submenu: [
         { label: "Sıkça Sorulan Sorular (SSS)", path: "/bilgi-bankasi/sss" },
-        {label: "Haberler" , path: "/bilgi-bankasi/haberler"}
+        { label: "Haberler", path: "/bilgi-bankasi/haberler" }
       ],
     },
     { label: "Odalar", path: "/odalar" },
@@ -71,10 +60,10 @@ const CustomNavbar = () => {
     <ReactstrapNavbar
       expand="lg"
       fixed="top"
-      className={`navbar-custom ${scrolled ? "scrolled" : ""} ${isHomePage ? "navbar-home" : "navbar-other"}`}
+      className="navbar-custom navbar-other"
     >
       <Container className="navbar-container">
-        <div className="navbar-brand-wrapper" style={{cursor:"pointer"}} onClick={() => window.location.href = "/"}>
+        <div className="navbar-brand-wrapper" style={{ cursor: "pointer" }} onClick={() => window.location.href = "/"}>
           <img src={Logo} alt="Logo" className="navbar-logo" />
           <h2 className="navbar-title">
             Mardin Esnaf ve Sanatkarlar Odalar Birliği

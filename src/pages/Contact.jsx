@@ -12,7 +12,7 @@ export const Contact = () => {
           <strong>Telefon:</strong> 0482 212 38 01
         </li>
         <li style={styles.listItem}>
-          <strong>E-posta:</strong> info@kurumadi.com
+          <strong>E-posta:</strong> mardinesob47100@gmail.com
         </li>
       </ul>
 

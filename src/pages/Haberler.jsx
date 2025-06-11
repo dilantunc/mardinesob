@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../../firebase-config";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
@@ -12,9 +12,15 @@ const Haberler = ({ isHomePage = false }) => {
 
   useEffect(() => {
     const fetchHaberler = async () => {
+      setLoading(true);
+      setError(null);
+
       try {
+        // Firestore sorgusunda direkt createdAt alanına göre sıralama yapıyoruz
         const colRef = collection(db, "Haberler");
-        const snapshot = await getDocs(colRef);
+        const q = query(colRef, orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+
         const data = snapshot.docs.map((doc) => {
           const haber = doc.data();
           return {
@@ -23,17 +29,19 @@ const Haberler = ({ isHomePage = false }) => {
             subject: haber.subject || "",
             detay: haber.detay || "",
             createdAt: haber.createdAt?.toDate
-              ? format(haber.createdAt.toDate(), "dd MMMM yyyy", { locale: tr })
-              : "Tarih bilgisi yok",
+              ? haber.createdAt.toDate()
+              : null,
           };
         });
 
-        const sorted = data.sort(
-          (a, b) =>
-            new Date(b.createdAt) - new Date(a.createdAt)
-        );
-        // Ana sayfada 4 haber gösterilecek
-        setHaberler(isHomePage ? sorted.slice(0, 4) : sorted);
+        // Eğer tarih yoksa en sona alalım
+        data.sort((a, b) => {
+          if (!a.createdAt) return 1;
+          if (!b.createdAt) return -1;
+          return b.createdAt - a.createdAt;
+        });
+
+        setHaberler(isHomePage ? data.slice(0, 4) : data);
       } catch (err) {
         console.error("Haberler alınamadı:", err);
         setError("Haberler yüklenirken bir hata oluştu.");
@@ -53,6 +61,7 @@ const Haberler = ({ isHomePage = false }) => {
     return (
       <div style={styles.error}>
         {error}
+        <br />
         <button onClick={() => window.location.reload()}>Tekrar Dene</button>
       </div>
     );
@@ -75,14 +84,14 @@ const Haberler = ({ isHomePage = false }) => {
       <div style={styles.haberlerList}>
         {haberler.map((haber) => (
           <Link to={`/haberler/${haber.id}`} key={haber.id} style={styles.card}>
-            <div style={styles.date}>{haber.createdAt}</div>
+            <div style={styles.date}>
+              {haber.createdAt
+                ? format(haber.createdAt, "dd MMMM yyyy", { locale: tr })
+                : "Tarih bilgisi yok"}
+            </div>
             <h3 style={styles.title}>{haber.name}</h3>
-            <p style={styles.summary}>
-              {isHomePage ? haber.name : haber.subject }
-            </p>
-            {isHomePage && (
-              <span style={styles.readMore}>Devamını oku →</span>
-            )}
+            <p style={styles.summary}>{isHomePage ? haber.name : haber.subject}</p>
+            {isHomePage && <span style={styles.readMore}>Devamını oku →</span>}
           </Link>
         ))}
       </div>
@@ -116,7 +125,7 @@ const styles = {
   haberlerList: {
     display: "grid",
     gap: "20px",
-    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", // Duyarlı tasarım için otomatik olarak genişler
+    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
   },
   card: {
     backgroundColor: "#fff",
