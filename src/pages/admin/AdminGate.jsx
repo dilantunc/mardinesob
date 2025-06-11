@@ -12,12 +12,11 @@ const AdminGate = () => {
 
         if (username === "admin" && password === "admin") {
             alert("Giriş Başarılı");
-            window.location.href = "/admin-esob-2025/anasayfa";
+            localStorage.setItem("isLoggedIn", "true");  // Giriş bilgisi kaydedildi
+            window.location.href = "/admin-esob-2025/anasayfa";  // Anasayfaya yönlendir
         } else {
             alert("Kullanıcı adı veya şifre hatalı!");
         }
-
-        console.log("Giriş yapıldı");
     };
 
     return (

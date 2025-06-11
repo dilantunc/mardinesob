@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import { 
   Table, 
   Button,
@@ -12,6 +12,7 @@ import {
 } from 'reactstrap';
 import { db } from '../../../firebase-config';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';  // react-router-dom kullanıyorsan
 
 const ContentArea = ({
   selectedOption,
@@ -24,6 +25,16 @@ const ContentArea = ({
 }) => {
   const [data, setData] = useState([]);
   const [newRow, setNewRow] = useState({});
+  const navigate = useNavigate();
+
+  // Giriş kontrolü
+  useEffect(() => {
+    const loggedIn = localStorage.getItem("isLoggedIn");
+    if (!loggedIn) {
+      alert("Lütfen giriş yapınız!");
+      navigate("/admin-esob-2025/admin-login");  // Giriş sayfasına yönlendir
+    }
+  }, [navigate]);
 
   // Veri çekme işlemi
   useEffect(() => {
