@@ -1,26 +1,58 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../../firebase-config";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { Link } from "react-router-dom";
+
+const formatFirestoreTimestamp = (timestamp) => {
+  if (!timestamp) return "Tarih yok";
+  if (typeof timestamp === "string") return timestamp;
+  if (timestamp.toDate) return timestamp.toDate().toLocaleString("tr-TR");
+  if (timestamp.seconds) {
+    return new Date(timestamp.seconds * 1000).toLocaleString("tr-TR");
+  }
+  return "Geçersiz tarih";
+};
 
 const Duyurular = ({ isHomePage = false }) => {
   const [duyurular, setDuyurular] = useState([]);
 
   useEffect(() => {
-    const fetchDuyurular = async () => {
-      try {
-        const colRef = collection(db, "Duyurular");
-        const snapshot = await getDocs(colRef);
-        const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        const sorted = data.sort((a, b) => new Date(b.tarih) - new Date(a.tarih));
-        setDuyurular(isHomePage ? sorted.slice(0, 2) : sorted);
-      } catch (error) {
-        console.error("Duyurular alınamadı:", error);
-      }
-    };
     fetchDuyurular();
-  }, [isHomePage]);
+  }, []);
 
+  const addDuyuru = async (newDuyuru) => {
+    try {
+      await addDoc(collection(db, "Duyurular"), {
+        baslik: newDuyuru.baslik,
+        ozet: newDuyuru.ozet,
+        detay: newDuyuru.detay,
+        tarih: serverTimestamp(),
+      });
+      alert("Duyuru başarıyla eklendi!");
+      fetchDuyurular(); // Listeyi yenile
+    } catch (error) {
+      console.error("Duyuru eklenirken hata oluştu:", error);
+    }
+  };
+
+  const fetchDuyurular = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "Duyurular"));
+      const data = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        tarih: formatFirestoreTimestamp(doc.data().tarih),
+      }));
+      setDuyurular(data);
+    } catch (error) {
+      console.error("Duyurular alınırken hata oluştu:", error);
+    }
+  };
   return (
     <div style={styles.container}>
       <h2 style={styles.header}>Duyurular</h2>
@@ -32,20 +64,17 @@ const Duyurular = ({ isHomePage = false }) => {
       )}
 
       <div style={styles.duyuruList}>
-        {duyurular.map((duyuru) => (
+        {(isHomePage ? duyurular.slice(0, 2) : duyurular).map((duyuru) => (
           <Link
             to={`/duyurular/${duyuru.id}`}
             key={duyuru.id}
             style={styles.card}
           >
-            <div style={styles.date}>{duyuru.tarih}</div>
             <h3 style={styles.title}>{duyuru.baslik}</h3>
             <p style={styles.summary}>
               {isHomePage ? duyuru.ozet : duyuru.detay}
             </p>
-            {isHomePage && (
-              <span style={styles.readMore}>Devamını oku →</span>
-            )}
+            {isHomePage && <span style={styles.readMore}>Devamını oku →</span>}
           </Link>
         ))}
       </div>

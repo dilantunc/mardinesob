@@ -25,7 +25,7 @@ const Home = () => {
     meslek: "Yönetim Kurulu Başkanı",
     hakkinda:
       "İsa Tunç, Mardin Esnaf ve Sanatkârlar Odaları Birliği (MESOB) Başkanıdır. Aynı zamanda Kızıltepe Marangozlar ve Mobilyacılar Odası Başkanlığı görevini de yürütmektedir. 2017 yılında MESOB başkanlığına seçilen Tunç, 2018'de yapılan genel kurulda da güven tazeleyerek görevine devam etmiştir. Başkanlığı süresince kurumsal yapının güçlendirilmesi, hizmet kalitesinin artırılması ve personelin uzmanlaşması gibi konulara öncelik vermiştir. Esnafın desteklenmesi gerektiğini sıkça vurgulayan Tunç, özellikle çıraklık ve ustalık eğitiminin önemine dikkat çekmiştir. Ayrıca sosyal girişimcilik projelerine destek vererek gençler ve kadınlar için fırsatlar oluşturmayı hedeflemiş, esnafa yönelik eğitim ve hibe destekleri konusunda çalışmalar yürütmüştür. Turizm dönemlerinde yapılan fahiş fiyat uygulamalarına karşı da net tavır almış ve esnafı Ahi ahlakıyla hareket etmeye çağırmıştır.",
-    resim: "../../public/isa_tunc.jpg",
+    resim: "https://www.mardinlife.com/uploads/2024/05/13/tunc-mardin-de-firsatcilik-turizme-darbe-vuruyor-490438.jpg",
   };
 
   const handleChange = (e) => {

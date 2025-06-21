@@ -73,39 +73,29 @@
     width: 100%;
   }
 
-  /* Duyurular ve Yönetim Kartı */
-  .duyuru-box,
-  .yonetim-box {
-    width: 50% !important;
+  .iletisim-kapsayici {
+    flex-direction: column !important; /* Satır yerine sütun */
+    gap: 24px !important;
+    padding: 24px 16px !important;
+  }
+
+  .iletisim-formu,
+  .harita-iframe {
+    width: 100% !important;
+    max-width: 100% !important;
     margin: 0 auto !important;
   }
 
-  /* Haber Kartları */
-  .haber-karti-container {
-    flex-direction: column;
-    align-items: center;
+  .harita-iframe iframe {
+    height: 300px !important; /* Mobil için daha uygun yükseklik */
   }
-
-  .haber-karti {
-    width: 90% !important;
-  }
-
-  /* İletişim Formu */
-  .iletisim-formu {
-    width: 100% !important;
-    padding: 16px !important;
-  }
-
-  .iletisim-formu input,
-  .iletisim-formu textarea {
-    font-size: 14px;
-  }
+}
 
   /* Footer */
   .footer-section {
     font-size: 14px;
   }
-}
+
 
 /* HABERLER */
 .haberler-container {

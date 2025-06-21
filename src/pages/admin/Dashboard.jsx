@@ -11,7 +11,6 @@ const Dashboard = () => {
 
   return (
     <div style={{ backgroundColor: "#f8f9fa", marginTop:" -160px" }}>
-      {/* Navbar her zaman üstte */}
       <Navbar_admin
         selectedOption={selectedOption}
         setSelectedOption={setSelectedOption}

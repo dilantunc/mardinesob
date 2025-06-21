@@ -7,7 +7,6 @@ const duyuruOption = {
     { id: "baslik", label: "Başlık" },
     { id: "ozet", label: "Özet" },
     { id: "detay", label: "Detay" },
-    { id: "tarih", label: "Tarih" },
   ],
 };
 

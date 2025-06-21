@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'; 
-import { 
-  Table, 
+import React, { useEffect, useState } from 'react';
+import {
+  Table,
   Button,
   Modal,
   ModalHeader,
@@ -8,11 +8,19 @@ import {
   ModalFooter,
   Input,
   FormGroup,
-  Label 
+  Label
 } from 'reactstrap';
 import { db } from '../../../firebase-config';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom';  // react-router-dom kullanıyorsan
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  serverTimestamp
+} from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
 const ContentArea = ({
   selectedOption,
@@ -27,32 +35,44 @@ const ContentArea = ({
   const [newRow, setNewRow] = useState({});
   const navigate = useNavigate();
 
-  // Giriş kontrolü
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn");
     if (!loggedIn) {
       alert("Lütfen giriş yapınız!");
-      navigate("/admin-esob-2025/admin-login");  // Giriş sayfasına yönlendir
+      navigate("/admin-esob-2025/admin-login");
     }
   }, [navigate]);
 
-  // Veri çekme işlemi
   useEffect(() => {
     if (selectedOption) {
       fetchData(selectedOption.collection);
     }
   }, [selectedOption]);
 
-  const fetchData = async (collectionName) => {
-    try {
-      const querySnapshot = await getDocs(collection(db, collectionName));
-      const docs = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setData(docs);
-    } catch (error) {
-      console.error('Veri çekme hatası:', error);
-    }
-  };
+ const fetchData = async (collectionName) => {
+  try {
+    const querySnapshot = await getDocs(collection(db, collectionName));
+const docs = querySnapshot.docs.map((doc) => {
+  const docData = doc.data();
+  const rawTarih = docData.tarih;
 
+  let formattedTarih = "Tarih yok";
+  if (rawTarih && typeof rawTarih.toDate === "function") {
+    formattedTarih = rawTarih.toDate().toLocaleString("tr-TR");
+  }
+
+  return {
+    id: doc.id,
+    ...docData,
+    tarih: formattedTarih
+  };
+});
+
+    setData(docs);
+  } catch (error) {
+    console.error('Veri çekme hatası:', error);
+  }
+};
   const handleEdit = (row) => {
     setSelectedRow(row);
     setIsModalOpen(true);
@@ -70,7 +90,8 @@ const ContentArea = ({
   const handleSave = async () => {
     try {
       const docRef = doc(db, selectedOption.collection, selectedRow.id);
-      await updateDoc(docRef, selectedRow);
+      const { tarih, id, ...fieldsToUpdate } = selectedRow;
+      await updateDoc(docRef, fieldsToUpdate);
       setData(data.map((item) => (item.id === selectedRow.id ? selectedRow : item)));
       setIsModalOpen(false);
     } catch (error) {
@@ -80,8 +101,11 @@ const ContentArea = ({
 
   const handleAdd = async () => {
     try {
-      const docRef = await addDoc(collection(db, selectedOption.collection), newRow);
-      setData([...data, { id: docRef.id, ...newRow }]);
+      const docRef = await addDoc(collection(db, selectedOption.collection), {
+        ...newRow,
+        tarih: serverTimestamp()
+      });
+      setData([...data, { id: docRef.id, ...newRow, tarih: new Date().toLocaleString("tr-TR") }]);
       setNewRow({});
       setIsAddModalOpen(false);
     } catch (error) {
@@ -125,11 +149,7 @@ const ContentArea = ({
     <>
       <h2 className="mb-4">{selectedOption.label}</h2>
 
-      <Button
-        color="success"
-        className="mb-3"
-        onClick={() => setIsAddModalOpen(true)}
-      >
+      <Button color="success" className="mb-3" onClick={() => setIsAddModalOpen(true)}>
         Yeni Veri Ekle
       </Button>
 
@@ -151,19 +171,10 @@ const ContentArea = ({
                 <td key={`${row.id}-${field.id}`}>{row[field.id] || '-'}</td>
               ))}
               <td>
-                <Button
-                  color="warning"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => handleEdit(row)}
-                >
+                <Button color="warning" size="sm" className="me-2" onClick={() => handleEdit(row)}>
                   Düzenle
                 </Button>
-                <Button
-                  color="danger"
-                  size="sm"
-                  onClick={() => handleDelete(row.id)}
-                >
+                <Button color="danger" size="sm" onClick={() => handleDelete(row.id)}>
                   Sil
                 </Button>
               </td>
@@ -172,39 +183,25 @@ const ContentArea = ({
         </tbody>
       </Table>
 
-      {/* Düzenleme Modalı */}
       <Modal isOpen={isModalOpen} toggle={() => setIsModalOpen(!isModalOpen)}>
         <ModalHeader toggle={() => setIsModalOpen(!isModalOpen)}>
           {selectedOption.label} Bilgilerini Düzenle
         </ModalHeader>
-        <ModalBody>
-          {renderModalFields()}
-        </ModalBody>
+        <ModalBody>{renderModalFields()}</ModalBody>
         <ModalFooter>
-          <Button color="primary" onClick={handleSave}>
-            Kaydet
-          </Button>
-          <Button color="secondary" onClick={() => setIsModalOpen(false)}>
-            İptal
-          </Button>
+          <Button color="primary" onClick={handleSave}>Kaydet</Button>
+          <Button color="secondary" onClick={() => setIsModalOpen(false)}>İptal</Button>
         </ModalFooter>
       </Modal>
 
-      {/* Yeni Veri Ekleme Modalı */}
       <Modal isOpen={isAddModalOpen} toggle={() => setIsAddModalOpen(!isAddModalOpen)}>
         <ModalHeader toggle={() => setIsAddModalOpen(!isAddModalOpen)}>
           Yeni {selectedOption.label} Ekle
         </ModalHeader>
-        <ModalBody>
-          {renderAddModalFields()}
-        </ModalBody>
+        <ModalBody>{renderAddModalFields()}</ModalBody>
         <ModalFooter>
-          <Button color="primary" onClick={handleAdd}>
-            Ekle
-          </Button>
-          <Button color="secondary" onClick={() => setIsAddModalOpen(false)}>
-            İptal
-          </Button>
+          <Button color="primary" onClick={handleAdd}>Ekle</Button>
+          <Button color="secondary" onClick={() => setIsAddModalOpen(false)}>İptal</Button>
         </ModalFooter>
       </Modal>
     </>
